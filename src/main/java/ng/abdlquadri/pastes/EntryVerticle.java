@@ -85,7 +85,22 @@ public class EntryVerticle extends AbstractVerticle {
     }
 
     private void handleDeleteOne(RoutingContext routingContext) {
-//        entryService.delete()
+
+        MultiMap params = routingContext.request().params();
+         String entryId = params.get("entryId");
+         String secret = routingContext.request().getHeader("x-secret");
+        entryServiceCasandra.delete(entryId,secret).setHandler(result -> {
+            if (result.succeeded()) {
+                if (result.result()) {
+                    routingContext.response().setStatusCode(204).end();
+                } else {
+                    serviceUnavailable(routingContext);
+                }
+            } else {
+                serviceUnavailable(routingContext);
+            }
+
+        });
     }
 
     private void handleUpdateEntry(RoutingContext routingContext) {

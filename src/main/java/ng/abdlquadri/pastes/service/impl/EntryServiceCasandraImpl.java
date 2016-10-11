@@ -150,7 +150,7 @@ public class EntryServiceCasandraImpl implements EntryService {
     @Override
     public Future<Boolean> delete(String entryId, String secret) {
         Future<Boolean> future = Future.future();
-
+        Boolean result = false;
         PreparedStatement preparedEntryDelete = session.prepare("DELETE FROM entriesP.entry " +
                 "WHERE entry_id=? AND secret=?");
 
@@ -163,7 +163,8 @@ public class EntryServiceCasandraImpl implements EntryService {
 
         session.execute(boundEntryDelete);
 
-        future.complete();
+        result = true;
+        future.complete(result);
         return future;
     }
 

@@ -38,7 +38,9 @@ public class PastesAPITest {
     private final static int PORT = 8080;
     private final static String SERVER = "127.0.0.1";
     private Vertx vertx;
-
+    private final UUID id = UUIDs.random();
+    private final String salt = new SecureRandomNumberGenerator().nextBytes().toHex();
+    private final String secret = new Sha512Hash("An Entry Body Text Dump FORM", salt, 300000).toHex();
 
     @Before
     public void before(TestContext context) {
@@ -57,6 +59,37 @@ public class PastesAPITest {
     public void after(TestContext context) {
 
         vertx.close(context.asyncAssertSuccess());
+    }
+
+
+    @Test(timeout = 5000L)
+    public void testDeleteEntry(TestContext context) throws Exception {
+
+
+        HttpClient client = vertx.createHttpClient();
+        Async async = context.async();
+
+        client.delete(PORT, SERVER, "/entries/"+id, response -> {
+            context.assertEquals(204, response.statusCode());
+            client.close();
+            async.complete();
+        }).putHeader("content-type", "application/json")
+                .putHeader("x-secret", secret)//this may break some clients, we can pass a second param
+                .end();
+
+    }
+
+    @Test(timeout = 5000L)
+    public void testEditEntry(TestContext context) throws Exception {
+
+        context.assertTrue(false);
+    }
+
+
+    @Test(timeout = 5000L)
+    public void testPaginatedListEntries(TestContext context) throws Exception {
+
+        context.assertTrue(false);
     }
 
     @Test(timeout = 5000L)
@@ -94,10 +127,6 @@ public class PastesAPITest {
         HttpClient client = vertx.createHttpClient();
         Async async = context.async();
 
-        UUID id = UUIDs.random();
-
-        String salt = new SecureRandomNumberGenerator().nextBytes().toHex();
-        String secret = new Sha512Hash("An Entry Body Text Dump FORM", salt, 300000).toHex();
 
         Instant now = Instant.now();
         Instant expires = now.plus(30, ChronoUnit.DAYS);
@@ -119,22 +148,7 @@ public class PastesAPITest {
 
     }
 
-    @Test(timeout = 3000L)
-    public void testPaginatedListEntries(TestContext context) throws Exception {
 
-        context.assertTrue(false);
-    }
 
-    @Test(timeout = 3000L)
-    public void testEditEntry(TestContext context) throws Exception {
-
-        context.assertTrue(false);
-    }
-
-    @Test(timeout = 3000L)
-    public void testDeleteEntry(TestContext context) throws Exception {
-
-        context.assertTrue(false);
-    }
 
 }
