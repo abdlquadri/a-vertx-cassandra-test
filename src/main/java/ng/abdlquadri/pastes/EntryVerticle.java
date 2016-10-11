@@ -64,7 +64,7 @@ public class EntryVerticle extends AbstractVerticle {
         router.get(Constants.API_GET).handler(this::handleGetOne);
         router.get(Constants.API_LIST_ALL).handler(this::handleGetAll);
         router.post(Constants.API_CREATE).handler(this::handleCreateEntry);
-        router.patch(Constants.API_UPDATE).handler(this::handleUpdateEntry);
+        router.put(Constants.API_UPDATE).handler(this::handleUpdateEntry);
         router.delete(Constants.API_DELETE).handler(this::handleDeleteOne);
         router.delete(Constants.API_DELETE_ALL).handler(this::handleDeleteAll);
     }
@@ -87,9 +87,9 @@ public class EntryVerticle extends AbstractVerticle {
     private void handleDeleteOne(RoutingContext routingContext) {
 
         MultiMap params = routingContext.request().params();
-         String entryId = params.get("entryId");
-         String secret = routingContext.request().getHeader("x-secret");
-        entryServiceCasandra.delete(entryId,secret).setHandler(result -> {
+        String entryId = params.get("entryId");
+        String secret = routingContext.request().getHeader("x-secret");
+        entryServiceCasandra.delete(entryId, secret).setHandler(result -> {
             if (result.succeeded()) {
                 if (result.result()) {
                     routingContext.response().setStatusCode(204).end();
@@ -187,7 +187,7 @@ public class EntryVerticle extends AbstractVerticle {
         allowMethods.add(HttpMethod.GET);
         allowMethods.add(HttpMethod.POST);
         allowMethods.add(HttpMethod.DELETE);
-        allowMethods.add(HttpMethod.PATCH);
+        allowMethods.add(HttpMethod.PUT);
 
         router.route().handler(CorsHandler.create("*")
                 .allowedHeaders(allowHeaders)
