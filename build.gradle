@@ -61,6 +61,10 @@ dependencies {
     compile "com.datastax.cassandra:cassandra-driver-mapping:3.1.0"
     compile "com.datastax.cassandra:cassandra-driver-extras:3.1.0"
 
+
+//    compile "com.englishtown.vertx:vertx-cassandra:3.2.0"
+
+
     compileOnly "io.vertx:vertx-codegen:$version"
 
     testCompile "io.vertx:vertx-unit:$version"

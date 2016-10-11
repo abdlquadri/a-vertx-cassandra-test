@@ -3,60 +3,85 @@ package ng.abdlquadri.pastes.entity;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
+import java.util.UUID;
+
 /**
  * Created by abdlquadri on 10/9/16.
  * <p>
- * Paste Data Object
+ * Entry Data Object
  */
 
 @DataObject(generateConverter = true)
-public class Paste {
+public class Entry {
 
-    private int id;
+    private UUID id;
     private String body;
     private String title;
     private long expires;//expiry timestamp
+    private long creationDate;
     private boolean visible;//private is keyword
+    private String secret;
 
-    public Paste() {
+    public long getCreationDate() {
+        return creationDate;
     }
 
-    public Paste(Paste paste) {
-
-        this.id = paste.id;
-        this.body = paste.body;
-        this.title = paste.title;
-        this.expires = paste.expires;
-        this.visible = paste.visible;
+    public void setCreationDate(long creationDate) {
+        this.creationDate = creationDate;
     }
 
-    public Paste(JsonObject pasteJson) {
-        PasteConverter.fromJson(pasteJson, this);
+    public String getSecret() {
+        return secret;
+
     }
 
-    public Paste(String pasteString) {
-        PasteConverter.fromJson(new JsonObject(pasteString), this);
+    public void setSecret(String secret) {
+        this.secret = secret;
     }
 
-    public Paste(int id, String body, String title, long expires, boolean visible) {
+    public Entry() {
+    }
+
+    public Entry(Entry entry) {
+
+        this.id = entry.id;
+        this.body = entry.body;
+        this.title = entry.title;
+        this.expires = entry.expires;
+        this.visible = entry.visible;
+        this.secret = entry.secret;
+        this.creationDate = entry.creationDate;
+    }
+
+    public Entry(JsonObject pasteJson) {
+        EntryConverter.fromJson(pasteJson, this);
+    }
+
+    public Entry(String pasteString) {
+        EntryConverter.fromJson(new JsonObject(pasteString), this);
+    }
+
+    public Entry(UUID id, String body, String title, long expires, boolean visible, String secret, long creationDate) {
         this.id = id;
         this.body = body;
         this.title = title;
         this.expires = expires;
         this.visible = visible;
+        this.secret = secret;
+        this.creationDate = creationDate;
     }
 
     public JsonObject toJson() {
         JsonObject jsonObject = new JsonObject();
-        PasteConverter.toJson(this, jsonObject);
+        EntryConverter.toJson(this, jsonObject);
         return jsonObject;
     }
 
-    public int getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

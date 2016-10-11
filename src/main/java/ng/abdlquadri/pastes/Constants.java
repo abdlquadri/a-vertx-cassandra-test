@@ -6,7 +6,9 @@ package ng.abdlquadri.pastes;
  */
 public final class Constants {
 
-  private Constants() {}
+    public static final String ADDRESS_PUBLIC_ENTRY = "entry.public";
+
+    private Constants() {}
 
   /** API Route */
   public static final String API_GET = "/entries/:entryId";

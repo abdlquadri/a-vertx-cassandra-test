@@ -8,7 +8,7 @@ package ng.abdlquadri.pastes.util;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
-import ng.abdlquadri.pastes.PasteVerticle;
+import ng.abdlquadri.pastes.EntryVerticle;
 
 /**
  *
@@ -21,7 +21,7 @@ public class DeployerVerticle extends AbstractVerticle {
 
         DeploymentOptions deploymentOptions = new DeploymentOptions().setConfig(config());
 
-        vertx.deployVerticle(new PasteVerticle(), deploymentOptions);
+        vertx.deployVerticle(new EntryVerticle(), deploymentOptions);
 
 
     }
