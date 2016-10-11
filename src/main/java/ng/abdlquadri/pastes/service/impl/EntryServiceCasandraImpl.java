@@ -14,6 +14,7 @@ import ng.abdlquadri.pastes.entity.Entry;
 import ng.abdlquadri.pastes.service.EntryService;
 
 import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -48,9 +49,10 @@ public class EntryServiceCasandraImpl implements EntryService {
         session.execute("CREATE KEYSPACE IF NOT EXISTS entriesP " +
                 "WITH REPLICATION = { 'class': 'SimpleStrategy', 'replication_factor': 1 };");
 
+        session.execute("DROP TABLE IF EXISTS entriesP.entry");
 
         session.execute("CREATE TABLE IF NOT EXISTS entriesP.entry (" +
-                "entry_id UUID, body TEXT, " +
+                "entry_id TEXT, body TEXT, " +
                 "title TEXT, creation_date TIMESTAMP, expires TIMESTAMP, " +
                 "publicly_visible BOOLEAN, secret TEXT, " +
                 "PRIMARY KEY(entry_id, secret));");
@@ -73,18 +75,20 @@ public class EntryServiceCasandraImpl implements EntryService {
         boolean result = false;
 
         PreparedStatement preparedEntryInsert = session.prepare("INSERT INTO entriesP.entry " +
-                "(entry_id, body, title,creation_date, expires, publicly_visible, secret)" +
+                "(entry_id, secret, body, title,creation_date, expires, publicly_visible)" +
                 "VALUES" +
-                "(UUID(),?,?,?,?,?,'njnvnvgj') IF NOT EXISTS");
-
+                "(?,?,?,?,?,?,?) IF NOT EXISTS");
+        System.out.println(entry.getSecret());
         BoundStatement boundEntryInsert = new BoundStatement(preparedEntryInsert);
         boundEntryInsert
-                .bind(entry.getBody())
-                .bind(entry.getTitle())
-                .bind(Instant.ofEpochMilli(entry.getCreationDate()).toString())
-                .bind(Instant.ofEpochMilli(entry.getExpires()).toString())
-                .bind(String.valueOf(entry.isVisible()))
-                .bind("hfddfg")
+                .bind()
+                .setString("entry_id", entry.getId())
+                .setString("secret", entry.getSecret())
+                .setString("body", entry.getBody())
+                .setString("title", entry.getTitle())
+                .setTimestamp("creation_date", new Date(entry.getCreationDate()))
+                .setTimestamp("expires", new Date(entry.getExpires()))
+                .setBool("publicly_visible", entry.isVisible())
         ;
 
         session.execute(boundEntryInsert);
@@ -105,7 +109,8 @@ public class EntryServiceCasandraImpl implements EntryService {
 
         BoundStatement boundEntryDelete = new BoundStatement(preparedEntryDelete);
         boundEntryDelete
-                .bind(true)
+                .bind()
+                .setBool("publicly_visible", true)
         ;
 
         session.execute(boundEntryDelete);
@@ -128,11 +133,12 @@ public class EntryServiceCasandraImpl implements EntryService {
 
         BoundStatement boundEntryUpdate = new BoundStatement(preparedEntryUpdate);
         boundEntryUpdate
-                .bind(newEntry.getBody())
-                .bind(newEntry.getTitle())
-                .bind(newEntry.isVisible())
-                .bind(newEntry.getId())
-                .bind(newEntry.getSecret())
+                .bind()
+                .setString("body", newEntry.getBody())
+                .setString("title", newEntry.getTitle())
+                .setBool("publicly_visible", newEntry.isVisible())
+                .setString("entry_id", newEntry.getId())
+                .setString("secret", newEntry.getSecret())
         ;
 
         session.execute(boundEntryUpdate);
@@ -150,8 +156,9 @@ public class EntryServiceCasandraImpl implements EntryService {
 
         BoundStatement boundEntryDelete = new BoundStatement(preparedEntryDelete);
         boundEntryDelete
-                .bind(entryId)
-                .bind(secret)
+                .bind()
+                .setString("entry_id", entryId)
+                .setString("secret", secret)
         ;
 
         session.execute(boundEntryDelete);

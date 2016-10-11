@@ -5,6 +5,7 @@ import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
@@ -17,6 +18,7 @@ import io.vertx.ext.web.handler.LoggerHandler;
 import ng.abdlquadri.pastes.entity.Entry;
 import ng.abdlquadri.pastes.service.EntryService;
 import ng.abdlquadri.pastes.service.impl.EntryServiceCasandraImpl;
+import ng.abdlquadri.pastes.util.Util;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -39,6 +41,7 @@ public class EntryVerticle extends AbstractVerticle {
         router = Router.router(vertx);
 
 
+        router.route().handler(BodyHandler.create());
         router.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
 
         allowCORSRequests();
@@ -58,7 +61,6 @@ public class EntryVerticle extends AbstractVerticle {
 
     private void setUpRouteHandlers() {
 
-        router.route().handler(BodyHandler.create());
         router.get(Constants.API_GET).handler(this::handleGetOne);
         router.get(Constants.API_LIST_ALL).handler(this::handleGetAll);
         router.post(Constants.API_CREATE).handler(this::handleCreateEntry);
@@ -91,8 +93,18 @@ public class EntryVerticle extends AbstractVerticle {
     }
 
     private void handleCreateEntry(RoutingContext routingContext) {
+        JsonObject bodyAsJson = new JsonObject();
 
-        JsonObject bodyAsJson = routingContext.getBodyAsJson();
+        if (routingContext.request().getHeader("content-type").equals("application/x-www-form-urlencoded")) {
+            bodyAsJson = Util.paramsToJSON(routingContext.request().setExpectMultipart(true).formAttributes());
+
+        } else {
+            bodyAsJson = routingContext.getBodyAsJson();
+
+        }
+
+        System.out.println(bodyAsJson);
+
         if (!validateParams(bodyAsJson)) {
             badRequest(routingContext);
             return;
@@ -106,7 +118,7 @@ public class EntryVerticle extends AbstractVerticle {
                 routingContext.response()
                         .setStatusCode(201)
                         .putHeader("content-type", "application/json")
-                        .end(createResponse.encode());
+                        .end(createResponse.put("secret", entry.getSecret()).encode());
 
                 if (entry.isVisible()) {
                     vertx.eventBus().publish(Constants.ADDRESS_PUBLIC_ENTRY, Json.encodePrettily(entry));

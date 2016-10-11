@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.net.URLEncoder;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -37,6 +38,7 @@ public class PastesAPITest {
     private final static int PORT = 8080;
     private final static String SERVER = "127.0.0.1";
     private Vertx vertx;
+
 
     @Before
     public void before(TestContext context) {
@@ -65,7 +67,7 @@ public class PastesAPITest {
         HttpClient client = vertx.createHttpClient();
         Async async = context.async();
 
-        UUID id = UUIDs.random();
+        String id = UUIDs.random().toString();
 
         String salt = new SecureRandomNumberGenerator().nextBytes().toHex();
         String secret = new Sha512Hash("An Entry Body Text Dump JSON", salt, 300000).toHex();
@@ -74,7 +76,7 @@ public class PastesAPITest {
         Instant expires = now.plus(30, ChronoUnit.DAYS);
 
         Entry entry = new Entry(id, "An Entry Body Text Dump JSON", "An Entry Title JSON", expires.getEpochSecond(), true, secret, now.getEpochSecond());
-        System.out.println(Json.encodePrettily(entry));
+
         client.post(PORT, SERVER, Constants.API_CREATE, response -> {
             context.assertEquals(201, response.statusCode());
             client.close();
@@ -87,7 +89,34 @@ public class PastesAPITest {
     public void testNewEntryViaHTMLForm(TestContext context) throws Exception {
 
         //If entry is public vertx.EventBus().publish()
-        context.assertTrue(false);
+
+
+        HttpClient client = vertx.createHttpClient();
+        Async async = context.async();
+
+        UUID id = UUIDs.random();
+
+        String salt = new SecureRandomNumberGenerator().nextBytes().toHex();
+        String secret = new Sha512Hash("An Entry Body Text Dump FORM", salt, 300000).toHex();
+
+        Instant now = Instant.now();
+        Instant expires = now.plus(30, ChronoUnit.DAYS);
+
+        String formData = "id=" + id +
+                "&body=An Entry Body Text Dump FORM" +
+                "&title=An Entry Title FORM" +
+                "&expires=" + expires.getEpochSecond() +
+                "&creationDate=" + now.getEpochSecond() +
+                "&visible=" + true +
+                "&secret" + secret;
+        String formDataEncoded = URLEncoder.encode(formData, "UTF-8");
+
+        client.post(PORT, SERVER, Constants.API_CREATE, response -> {
+            context.assertEquals(201, response.statusCode());
+            client.close();
+            async.complete();
+        }).putHeader("content-type", "application/x-www-form-urlencoded").end(formDataEncoded);
+
     }
 
     @Test(timeout = 3000L)

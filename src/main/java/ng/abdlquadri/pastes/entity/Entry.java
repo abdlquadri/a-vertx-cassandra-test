@@ -14,7 +14,7 @@ import java.util.UUID;
 @DataObject(generateConverter = true)
 public class Entry {
 
-    private UUID id;
+    private String id;
     private String body;
     private String title;
     private long expires;//expiry timestamp
@@ -61,7 +61,7 @@ public class Entry {
         EntryConverter.fromJson(new JsonObject(pasteString), this);
     }
 
-    public Entry(UUID id, String body, String title, long expires, boolean visible, String secret, long creationDate) {
+    public Entry(String id, String body, String title, long expires, boolean visible, String secret, long creationDate) {
         this.id = id;
         this.body = body;
         this.title = title;
@@ -77,11 +77,11 @@ public class Entry {
         return jsonObject;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String  id) {
         this.id = id;
     }
 
