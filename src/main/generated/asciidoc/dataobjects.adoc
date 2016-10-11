@@ -1,0 +1,25 @@
+= Cheatsheets
+
+[[Entry]]
+== Entry
+
+++++
+ Created by abdlquadri on 10/9/16.
+ <p>
+ Entry Data Object
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[body]]`body`|`String`|-
+|[[creationDate]]`creationDate`|`Number (long)`|-
+|[[expires]]`expires`|`Number (long)`|-
+|[[id]]`id`|`String`|-
+|[[secret]]`secret`|`String`|-
+|[[title]]`title`|`String`|-
+|[[visible]]`visible`|`Boolean`|-
+|===
+
