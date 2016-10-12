@@ -1,14 +1,12 @@
 package ng.abdlquadri.pastes;
 
-import io.vertx.codegen.annotations.Nullable;
-import io.vertx.core.*;
-import io.vertx.core.buffer.Buffer;
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Future;
+import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
-import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -18,11 +16,12 @@ import io.vertx.ext.web.handler.LoggerHandler;
 import ng.abdlquadri.pastes.entity.Entry;
 import ng.abdlquadri.pastes.service.EntryService;
 import ng.abdlquadri.pastes.service.impl.EntryServiceCasandraImpl;
-import ng.abdlquadri.pastes.util.Util;
 
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+
+import static ng.abdlquadri.pastes.util.Util.paramsToJSON;
 
 /**
  * Created by abdlquadri on 10/9/16.
@@ -108,7 +107,7 @@ public class EntryVerticle extends AbstractVerticle {
         JsonObject bodyAsJson;
 
         if (routingContext.request().getHeader("content-type").equals("application/x-www-form-urlencoded")) {
-            bodyAsJson = Util.paramsToJSON(routingContext.request().setExpectMultipart(true).formAttributes());
+            bodyAsJson = paramsToJSON(routingContext.request().formAttributes());
 
         } else {
             bodyAsJson = routingContext.getBodyAsJson();
@@ -135,11 +134,13 @@ public class EntryVerticle extends AbstractVerticle {
     }
 
     private void handleCreateEntry(RoutingContext routingContext) {
-        JsonObject bodyAsJson;
+        JsonObject bodyAsJson = new JsonObject();
 
         if (routingContext.request().getHeader("content-type").equals("application/x-www-form-urlencoded")) {
-            bodyAsJson = Util.paramsToJSON(routingContext.request().setExpectMultipart(true).formAttributes());
 
+            bodyAsJson = paramsToJSON(routingContext.request().formAttributes());
+
+            System.out.println(routingContext.getBodyAsString());
         } else {
             bodyAsJson = routingContext.getBodyAsJson();
 

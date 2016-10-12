@@ -224,14 +224,13 @@ public class PastesAPITest {
                 "&expires=" + expires.getEpochSecond() +
                 "&creationDate=" + now.getEpochSecond() +
                 "&visible=" + true +
-                "&secret" + secret;
-        String formDataEncoded = URLEncoder.encode(formData, "UTF-8");
+                "&secret=" + secret;
 
         client.post(PORT, SERVER, Constants.API_CREATE, response -> {
             context.assertEquals(201, response.statusCode());
             client.close();
             async.complete();
-        }).putHeader("content-type", "application/x-www-form-urlencoded").end(formDataEncoded);
+        }).putHeader("content-type", "application/x-www-form-urlencoded").end(formData);
 
     }
 

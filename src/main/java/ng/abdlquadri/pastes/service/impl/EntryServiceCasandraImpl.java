@@ -1,25 +1,14 @@
 package ng.abdlquadri.pastes.service.impl;
 
 import com.datastax.driver.core.*;
-import com.datastax.driver.core.utils.UUIDs;
-import com.google.common.util.concurrent.AsyncFunction;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import io.vertx.core.Future;
-import io.vertx.core.Vertx;
-import io.vertx.core.json.Json;
-import ng.abdlquadri.pastes.Constants;
 import ng.abdlquadri.pastes.entity.Entry;
 import ng.abdlquadri.pastes.service.EntryService;
 
-import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by abdlquadri on 10/9/16.

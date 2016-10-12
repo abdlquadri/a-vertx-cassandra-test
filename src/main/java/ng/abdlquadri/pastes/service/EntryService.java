@@ -1,6 +1,5 @@
 package ng.abdlquadri.pastes.service;
 
-import com.datastax.driver.core.Cluster;
 import io.vertx.core.Future;
 import ng.abdlquadri.pastes.entity.Entry;
 

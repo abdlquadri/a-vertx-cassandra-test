@@ -4,8 +4,6 @@ import com.datastax.driver.core.Row;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
-import java.util.UUID;
-
 /**
  * Created by abdlquadri on 10/9/16.
  * <p>

@@ -5,22 +5,14 @@
  */
 package ng.abdlquadri.pastes.util;
 
-import io.netty.handler.codec.http.QueryStringDecoder;
 import io.vertx.core.MultiMap;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.CaseInsensitiveHeaders;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.shareddata.LocalMap;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.apache.shiro.crypto.hash.Sha512Hash;
 
 /**
  *
