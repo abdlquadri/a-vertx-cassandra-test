@@ -1,5 +1,6 @@
 import com.datastax.driver.core.utils.UUIDs;
 import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.Json;
@@ -62,14 +63,14 @@ public class PastesAPITest {
     }
 
 
-    @Test(timeout = 5000L)
+    @Test
     public void testDeleteEntry(TestContext context) throws Exception {
 
 
         HttpClient client = vertx.createHttpClient();
         Async async = context.async();
 
-        client.delete(PORT, SERVER, "/entries/"+id, response -> {
+        client.delete(PORT, SERVER, "/entries/" + id, response -> {
             context.assertEquals(204, response.statusCode());
             client.close();
             async.complete();
@@ -79,14 +80,14 @@ public class PastesAPITest {
 
     }
 
-    @Test(timeout = 5000L)
+    @Test
     public void testEditEntry(TestContext context) throws Exception {
 
         context.assertTrue(false);
     }
 
 
-    @Test(timeout = 5000L)
+    @Test
     public void testPaginatedListEntries(TestContext context) throws Exception {
         HttpClient client = vertx.createHttpClient();
         Async async = context.async();
@@ -99,7 +100,38 @@ public class PastesAPITest {
                 .end();
     }
 
-    @Test(timeout = 5000L)
+    @Test
+    public void testGetOneEntry(TestContext context) throws Exception {
+
+        HttpClient client = vertx.createHttpClient();
+        Async async = context.async();
+
+        Future<Object> testGetOneFuture = Future.future();
+        Future<Object> insertOneFuture = Future.future();
+
+        Instant now = Instant.now();
+        Instant expires = now.plus(30, ChronoUnit.DAYS);
+
+        UUID uuid = UUIDs.timeBased();
+
+        Entry payload = new Entry(uuid.toString(), "An Entry Body Text Dump JSON", "An Entry Title JSON", expires.getEpochSecond(), true, secret, now.getEpochSecond());
+
+        client.post(PORT, SERVER, "/entries", response -> {
+
+            client.get(PORT, SERVER, "/entries/" + uuid, response2 -> {
+                context.assertEquals(200, response2.statusCode());
+                client.close();
+                async.complete();
+            }).putHeader("content-type", "application/json")
+                    .end();
+
+        }).putHeader("content-type", "application/json")
+                .end(Json.encode(payload));
+
+
+    }
+
+    @Test
     public void testNewEntryViaJSON(TestContext context) throws Exception {
 
         //If entry is public vertx.EventBus().publish()
@@ -125,7 +157,7 @@ public class PastesAPITest {
 
     }
 
-    @Test(timeout = 5000L)
+    @Test
     public void testNewEntryViaHTMLForm(TestContext context) throws Exception {
 
         //If entry is public vertx.EventBus().publish()
@@ -154,8 +186,6 @@ public class PastesAPITest {
         }).putHeader("content-type", "application/x-www-form-urlencoded").end(formDataEncoded);
 
     }
-
-
 
 
 }

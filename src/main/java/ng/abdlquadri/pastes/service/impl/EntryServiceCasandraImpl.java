@@ -51,8 +51,8 @@ public class EntryServiceCasandraImpl implements EntryService {
         session.execute("CREATE KEYSPACE IF NOT EXISTS entriesP " +
                 "WITH REPLICATION = { 'class': 'SimpleStrategy', 'replication_factor': 1 };");
 
-        session.execute("DROP TABLE IF EXISTS entriesP.entry");
-        session.execute("DROP TABLE IF EXISTS entriesP.entryPublic");
+//        session.execute("DROP TABLE IF EXISTS entriesP.entry");
+//        session.execute("DROP TABLE IF EXISTS entriesP.entryPublic");
 //        session.execute("CREATE INDEX publiclyVisibleIndex ON entriesP.entry(publicly_visible)");
 //
         session.execute("CREATE TABLE IF NOT EXISTS entriesP.entry (" +
@@ -114,7 +114,7 @@ public class EntryServiceCasandraImpl implements EntryService {
         Future<List<Entry>> future = Future.future();
 
         PreparedStatement preparedEntryDelete = session.prepare("SELECT * FROM entriesP.entryPublic " +
-                " WHERE publicly_visible=? "+
+                " WHERE publicly_visible=? " +
                 "ORDER BY creation_date DESC ALLOW FILTERING"
         );
 
@@ -131,7 +131,6 @@ public class EntryServiceCasandraImpl implements EntryService {
         PagingState pagingState = resultSet.getExecutionInfo().getPagingState();
 
 
-
         List<Entry> entries = resultSet.all().stream()
                 .map(Entry::new)
                 .collect(Collectors.toList());
@@ -142,7 +141,38 @@ public class EntryServiceCasandraImpl implements EntryService {
 
     @Override
     public Future<Optional<Entry>> get(String entryID) {
-        return null;
+        Future<Optional<Entry>> future = Future.future();
+
+        PreparedStatement preparedEntryDelete = session.prepare("SELECT * FROM entriesP.entry " +
+                " WHERE entry_id=? "
+        );
+
+        BoundStatement boundEntryDelete = new BoundStatement(preparedEntryDelete);
+        boundEntryDelete
+                .bind()
+                .setString("entry_id", entryID)
+        ;
+
+        ResultSet resultSet = session.execute(boundEntryDelete);
+
+        Row row = resultSet.one();
+
+        if (row == null) {
+            future.complete(null);
+        }
+
+        Entry entry = new Entry();
+        entry.setId(row.getString("entry_id"));
+        entry.setBody(row.getString("body"));
+        entry.setTitle(row.getString("title"));
+        entry.setExpires(row.getTimestamp("expires").getTime());
+        entry.setVisible(row.getBool("publicly_visible"));
+        entry.setSecret(row.getString("secret"));
+        entry.setCreationDate(row.getTimestamp("creation_date").getTime());
+
+        future.complete(Optional.ofNullable(entry));
+        return future;
+
     }
 
     @Override

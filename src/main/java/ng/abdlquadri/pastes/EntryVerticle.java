@@ -21,6 +21,7 @@ import ng.abdlquadri.pastes.service.impl.EntryServiceCasandraImpl;
 import ng.abdlquadri.pastes.util.Util;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -172,7 +173,29 @@ public class EntryVerticle extends AbstractVerticle {
     }
 
     private void handleGetOne(RoutingContext routingContext) {
+        MultiMap params = routingContext.request().params();
+        String entryId = params.get("entryId");
+        entryServiceCasandra.get(entryId).setHandler(result -> {
+            if (result.succeeded()) {
+                if (result == null) {
+                    serviceUnavailable(routingContext);
 
+                } else {
+                    Optional<Entry> res = result.result();
+
+                    if (!res.isPresent()) {
+                        notFound(routingContext);
+                        return;
+                    }
+
+                    String entry = Json.encodePrettily(res.get());
+                    routingContext.response().setStatusCode(200).end(entry);
+                }
+            } else {
+                serviceUnavailable(routingContext);
+            }
+
+        });
     }
 
     private void sendError(int statusCode, HttpServerResponse response) {
