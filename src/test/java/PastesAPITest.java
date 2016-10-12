@@ -88,8 +88,15 @@ public class PastesAPITest {
 
     @Test(timeout = 5000L)
     public void testPaginatedListEntries(TestContext context) throws Exception {
+        HttpClient client = vertx.createHttpClient();
+        Async async = context.async();
 
-        context.assertTrue(false);
+        client.get(PORT, SERVER, "/entries", response -> {
+            context.assertEquals(200, response.statusCode());
+            client.close();
+            async.complete();
+        }).putHeader("content-type", "application/json")
+                .end();
     }
 
     @Test(timeout = 5000L)

@@ -1,5 +1,6 @@
 package ng.abdlquadri.pastes.entity;
 
+import com.datastax.driver.core.Row;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
@@ -21,6 +22,18 @@ public class Entry {
     private long creationDate;
     private boolean visible;//private is keyword
     private String secret;
+
+    public Entry(Row row) {
+
+        this.id = row.getString("entry_id");
+        this.body = row.getString("body");
+        this.title = row.getString("title");
+        this.expires = row.getLong("expires");
+        this.visible = row.getBool("publicly_visible");
+        this.secret = row.getString("secret");
+        this.creationDate = row.getLong("creation_date");
+
+    }
 
     public long getCreationDate() {
         return creationDate;

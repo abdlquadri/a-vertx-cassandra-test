@@ -18,6 +18,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by abdlquadri on 10/9/16.
@@ -50,12 +52,20 @@ public class EntryServiceCasandraImpl implements EntryService {
                 "WITH REPLICATION = { 'class': 'SimpleStrategy', 'replication_factor': 1 };");
 
         session.execute("DROP TABLE IF EXISTS entriesP.entry");
-
+        session.execute("DROP TABLE IF EXISTS entriesP.entryPublic");
+//        session.execute("CREATE INDEX publiclyVisibleIndex ON entriesP.entry(publicly_visible)");
+//
         session.execute("CREATE TABLE IF NOT EXISTS entriesP.entry (" +
                 "entry_id TEXT, body TEXT, " +
                 "title TEXT, creation_date TIMESTAMP, expires TIMESTAMP, " +
                 "publicly_visible BOOLEAN, secret TEXT, " +
-                "PRIMARY KEY(entry_id, secret));");
+                "PRIMARY KEY(entry_id, secret));");//design for query, cassandra is interesting
+
+        session.execute("CREATE TABLE IF NOT EXISTS entriesP.entryPublic (" +
+                "entry_id TEXT, body TEXT, " +
+                "title TEXT, creation_date TIMESTAMP, expires TIMESTAMP, " +
+                "publicly_visible BOOLEAN, secret TEXT, " +
+                "PRIMARY KEY(publicly_visible, creation_date, entry_id, secret));");//design for query, cassandra is interesting
 
         future.complete(session != null);
 
@@ -103,9 +113,10 @@ public class EntryServiceCasandraImpl implements EntryService {
 
         Future<List<Entry>> future = Future.future();
 
-        PreparedStatement preparedEntryDelete = session.prepare("SELECT * FROM entriesP.entry " +
-                "ORDER BY creation_date DESC" +
-                "WHERE publicly_visible=? ");
+        PreparedStatement preparedEntryDelete = session.prepare("SELECT * FROM entriesP.entryPublic " +
+                " WHERE publicly_visible=? "+
+                "ORDER BY creation_date DESC ALLOW FILTERING"
+        );
 
         BoundStatement boundEntryDelete = new BoundStatement(preparedEntryDelete);
         boundEntryDelete
@@ -113,9 +124,19 @@ public class EntryServiceCasandraImpl implements EntryService {
                 .setBool("publicly_visible", true)
         ;
 
-        session.execute(boundEntryDelete);
+        boundEntryDelete.setFetchSize(100);//we could include a parameter to allow clients set this
 
-        future.complete();
+        ResultSet resultSet = session.execute(boundEntryDelete);
+
+        PagingState pagingState = resultSet.getExecutionInfo().getPagingState();
+
+
+
+        List<Entry> entries = resultSet.all().stream()
+                .map(Entry::new)
+                .collect(Collectors.toList());
+
+        future.complete(entries);
         return future;
     }
 
