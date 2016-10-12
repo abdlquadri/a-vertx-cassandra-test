@@ -26,8 +26,8 @@ import java.util.stream.Stream;
  */
 public class EntryServiceCasandraImpl implements EntryService {
 
-    private static Cluster cluster;
-    private static Session session;
+    public static Cluster cluster;
+    public static Session session;
 
     @Override
     public Future<Boolean> initializeDatastore() {

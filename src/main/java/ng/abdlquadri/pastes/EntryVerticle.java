@@ -105,6 +105,32 @@ public class EntryVerticle extends AbstractVerticle {
     }
 
     private void handleUpdateEntry(RoutingContext routingContext) {
+        JsonObject bodyAsJson;
+
+        if (routingContext.request().getHeader("content-type").equals("application/x-www-form-urlencoded")) {
+            bodyAsJson = Util.paramsToJSON(routingContext.request().setExpectMultipart(true).formAttributes());
+
+        } else {
+            bodyAsJson = routingContext.getBodyAsJson();
+
+        }
+
+        System.out.println(bodyAsJson);
+
+        Entry entry = new Entry(bodyAsJson);
+
+        entryServiceCasandra.update(entry.getId(), entry).setHandler(result -> {
+            if (result.result() != null) {
+                routingContext.response()
+                        .setStatusCode(200)
+                        .putHeader("content-type", "application/json")
+                        .end();
+
+            } else {
+                serviceUnavailable(routingContext);
+            }
+
+        });
 
     }
 

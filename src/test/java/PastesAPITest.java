@@ -1,11 +1,13 @@
+import com.datastax.driver.core.BoundStatement;
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.Session;
 import com.datastax.driver.core.utils.UUIDs;
 import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.shiro.ShiroAuth;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -16,18 +18,17 @@ import org.apache.shiro.crypto.SecureRandomNumberGenerator;
 import org.apache.shiro.crypto.hash.Sha512Hash;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.net.URLEncoder;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.Temporal;
-import java.time.temporal.TemporalAmount;
-import java.time.temporal.TemporalUnit;
 import java.util.Date;
 import java.util.UUID;
+
+import static ng.abdlquadri.pastes.service.impl.EntryServiceCasandraImpl.session;
 
 /**
  * Created by abdlquadri on 10/9/16.
@@ -39,9 +40,43 @@ public class PastesAPITest {
     private final static int PORT = 8080;
     private final static String SERVER = "127.0.0.1";
     private Vertx vertx;
-    private final UUID id = UUIDs.random();
-    private final String salt = new SecureRandomNumberGenerator().nextBytes().toHex();
-    private final String secret = new Sha512Hash("An Entry Body Text Dump FORM", salt, 300000).toHex();
+    private static final String id = UUIDs.random().toString();
+    private static final String salt = new SecureRandomNumberGenerator().nextBytes().toHex();
+    private static final String secret = new Sha512Hash("An Entry Body Text Dump FORM", salt, 300000).toHex();
+    private static final Instant now = Instant.now();
+    private static final Instant expires = now.plus(30, ChronoUnit.DAYS);
+
+//    @BeforeClass
+//    public static void beforeClass(TestContext context) {
+//
+//        Cluster cluster = Cluster.builder()
+//                .addContactPoint("127.0.0.1")
+//                .build();
+//        Session sessionTest = cluster.connect();
+//        Entry entry = new Entry(id, "An Entry Body Text Dump JSON", "An Entry Title JSON", expires.getEpochSecond(), true, secret, now.getEpochSecond());
+//
+//        PreparedStatement preparedEntryInsert = sessionTest.prepare("INSERT INTO entriesP.entry " +
+//                "(entry_id, secret, body, title,creation_date, expires, publicly_visible)" +
+//                "VALUES" +
+//                "(?,?,?,?,?,?,?) IF NOT EXISTS");
+//        System.out.println(entry.getSecret());
+//        BoundStatement boundEntryInsert = new BoundStatement(preparedEntryInsert);
+//        boundEntryInsert
+//                .bind()
+//                .setString("entry_id", entry.getId())
+//                .setString("secret", entry.getSecret())
+//                .setString("body", entry.getBody())
+//                .setString("title", entry.getTitle())
+//                .setTimestamp("creation_date", new Date(entry.getCreationDate()))
+//                .setTimestamp("expires", new Date(entry.getExpires()))
+//                .setBool("publicly_visible", entry.isVisible())
+//        ;
+//
+//        sessionTest.execute(boundEntryInsert);
+//        sessionTest.close();
+//        context.asyncAssertSuccess();
+//
+//    }
 
     @Before
     public void before(TestContext context) {
@@ -52,8 +87,7 @@ public class PastesAPITest {
 
         EntryVerticle verticle = new EntryVerticle();
 
-        vertx.deployVerticle(verticle, options,
-                context.asyncAssertSuccess());
+        vertx.deployVerticle(verticle, options, context.asyncAssertSuccess());
     }
 
     @After
@@ -83,7 +117,24 @@ public class PastesAPITest {
     @Test
     public void testEditEntry(TestContext context) throws Exception {
 
-        context.assertTrue(false);
+        HttpClient client = vertx.createHttpClient();
+        Async async = context.async();
+        String requestURI = "/entries/668afb50-9095-11e6-94cb-f151169f5d76"; //this id should be created first
+
+        client.get(PORT, SERVER, requestURI, response -> {
+
+            response.bodyHandler(buffer -> {
+                JsonObject entryUpdated = buffer.toJsonObject().put("body", "Overridden");//override body field;
+
+                client.put(PORT, SERVER, requestURI, response2 -> {
+                    context.assertEquals(200, response2.statusCode());
+                    client.close();
+                    async.complete();
+                }).putHeader("content-type", "application/json").end(entryUpdated.encode());
+            });
+        }).putHeader("content-type", "application/json")
+                .end();
+
     }
 
 
@@ -105,9 +156,6 @@ public class PastesAPITest {
 
         HttpClient client = vertx.createHttpClient();
         Async async = context.async();
-
-        Future<Object> testGetOneFuture = Future.future();
-        Future<Object> insertOneFuture = Future.future();
 
         Instant now = Instant.now();
         Instant expires = now.plus(30, ChronoUnit.DAYS);
