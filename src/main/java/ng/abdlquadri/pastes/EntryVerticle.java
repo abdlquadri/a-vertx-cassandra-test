@@ -14,6 +14,7 @@ import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.handler.LoggerFormat;
 import io.vertx.ext.web.handler.LoggerHandler;
 import io.vertx.ext.web.handler.sockjs.BridgeOptions;
+import io.vertx.ext.web.handler.sockjs.PermittedOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSHandler;
 import ng.abdlquadri.pastes.entity.Entry;
 import ng.abdlquadri.pastes.service.EntryService;
@@ -23,6 +24,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import static ng.abdlquadri.pastes.Constants.ADDRESS_PUBLIC_ENTRY;
 import static ng.abdlquadri.pastes.util.Util.paramsToJSON;
 
 /**
@@ -52,6 +54,9 @@ public class EntryVerticle extends AbstractVerticle {
 
         SockJSHandler sockJSHandler = SockJSHandler.create(vertx);
         BridgeOptions options = new BridgeOptions();
+
+        PermittedOptions outboundPermitted = new PermittedOptions().setAddress(ADDRESS_PUBLIC_ENTRY);
+        options.addOutboundPermitted(outboundPermitted);
         sockJSHandler.bridge(options);
 
         router.route("/latest/*").handler(sockJSHandler);
@@ -173,7 +178,7 @@ public class EntryVerticle extends AbstractVerticle {
                         .end(createResponse.put("secret", entry.getSecret()).encode());
 
                 if (entry.isVisible()) {
-                    vertx.eventBus().publish(Constants.ADDRESS_PUBLIC_ENTRY, Json.encodePrettily(entry));
+                    vertx.eventBus().publish(ADDRESS_PUBLIC_ENTRY, Json.encodePrettily(entry));
 
                 }
             } else {
@@ -198,7 +203,7 @@ public class EntryVerticle extends AbstractVerticle {
 
                 } else if (result.result().isEmpty()) {
                     notFound(routingContext);
-                }else {
+                } else {
 
                     String entries = Json.encodePrettily(result.result());
                     routingContext.response().setStatusCode(200).end(entries);
