@@ -78,7 +78,7 @@ public class PastesAPITest {
             client.close();
             async.complete();
         }).putHeader("content-type", "application/json")
-                .putHeader("x-secret", secret)//this may break some clients, we can pass a second param
+                .putHeader("x-secret", "mnnv")//this may break some clients, we can pass a second param
                 .end();
 
     }

@@ -13,6 +13,8 @@ import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.handler.LoggerFormat;
 import io.vertx.ext.web.handler.LoggerHandler;
+import io.vertx.ext.web.handler.sockjs.BridgeOptions;
+import io.vertx.ext.web.handler.sockjs.SockJSHandler;
 import ng.abdlquadri.pastes.entity.Entry;
 import ng.abdlquadri.pastes.service.EntryService;
 import ng.abdlquadri.pastes.service.impl.EntryServiceCasandraImpl;
@@ -47,6 +49,13 @@ public class EntryVerticle extends AbstractVerticle {
         allowCORSRequests();
 
         setUpRouteHandlers();
+
+        SockJSHandler sockJSHandler = SockJSHandler.create(vertx);
+        BridgeOptions options = new BridgeOptions();
+        sockJSHandler.bridge(options);
+
+        router.route("/latest/*").handler(sockJSHandler);
+
 
         //Start the REST Server
         vertx.createHttpServer()
@@ -187,7 +196,9 @@ public class EntryVerticle extends AbstractVerticle {
                 if (result == null) {
                     serviceUnavailable(routingContext);
 
-                } else {
+                } else if (result.result().isEmpty()) {
+                    notFound(routingContext);
+                }else {
 
                     String entries = Json.encodePrettily(result.result());
                     routingContext.response().setStatusCode(200).end(entries);
