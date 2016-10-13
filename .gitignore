@@ -1,6 +1,5 @@
 build/
 .idea/
 .gradle/
-/config/
 /gradle/
 /src/main/generated/
