@@ -40,9 +40,6 @@ public class EntryServiceCasandraImpl implements EntryService {
         session.execute("CREATE KEYSPACE IF NOT EXISTS entriesP " +
                 "WITH REPLICATION = { 'class': 'SimpleStrategy', 'replication_factor': 1 };");
 
-//        session.execute("DROP TABLE IF EXISTS entriesP.entry");
-//        session.execute("DROP TABLE IF EXISTS entriesP.entryPublic");
-//        session.execute("CREATE INDEX publiclyVisibleIndex ON entriesP.entry(publicly_visible)");
 //
         session.execute("CREATE TABLE IF NOT EXISTS entriesP.entry (" +
                 "entry_id TEXT, body TEXT, " +

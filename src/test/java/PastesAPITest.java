@@ -14,6 +14,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import ng.abdlquadri.pastes.Constants;
 import ng.abdlquadri.pastes.EntryVerticle;
 import ng.abdlquadri.pastes.entity.Entry;
+import ng.abdlquadri.pastes.service.impl.EntryServiceCasandraImpl;
 import org.apache.shiro.crypto.SecureRandomNumberGenerator;
 import org.apache.shiro.crypto.hash.Sha512Hash;
 import org.junit.After;
@@ -45,38 +46,6 @@ public class PastesAPITest {
     private static final String secret = new Sha512Hash("An Entry Body Text Dump FORM", salt, 300000).toHex();
     private static final Instant now = Instant.now();
     private static final Instant expires = now.plus(30, ChronoUnit.DAYS);
-
-//    @BeforeClass
-//    public static void beforeClass(TestContext context) {
-//
-//        Cluster cluster = Cluster.builder()
-//                .addContactPoint("127.0.0.1")
-//                .build();
-//        Session sessionTest = cluster.connect();
-//        Entry entry = new Entry(id, "An Entry Body Text Dump JSON", "An Entry Title JSON", expires.getEpochSecond(), true, secret, now.getEpochSecond());
-//
-//        PreparedStatement preparedEntryInsert = sessionTest.prepare("INSERT INTO entriesP.entry " +
-//                "(entry_id, secret, body, title,creation_date, expires, publicly_visible)" +
-//                "VALUES" +
-//                "(?,?,?,?,?,?,?) IF NOT EXISTS");
-//        System.out.println(entry.getSecret());
-//        BoundStatement boundEntryInsert = new BoundStatement(preparedEntryInsert);
-//        boundEntryInsert
-//                .bind()
-//                .setString("entry_id", entry.getId())
-//                .setString("secret", entry.getSecret())
-//                .setString("body", entry.getBody())
-//                .setString("title", entry.getTitle())
-//                .setTimestamp("creation_date", new Date(entry.getCreationDate()))
-//                .setTimestamp("expires", new Date(entry.getExpires()))
-//                .setBool("publicly_visible", entry.isVisible())
-//        ;
-//
-//        sessionTest.execute(boundEntryInsert);
-//        sessionTest.close();
-//        context.asyncAssertSuccess();
-//
-//    }
 
     @Before
     public void before(TestContext context) {
@@ -120,6 +89,10 @@ public class PastesAPITest {
         HttpClient client = vertx.createHttpClient();
         Async async = context.async();
         String requestURI = "/entries/668afb50-9095-11e6-94cb-f151169f5d76"; //this id should be created first
+
+        EntryServiceCasandraImpl entryServiceCasandra = new EntryServiceCasandraImpl();
+        Entry payload = new Entry("668afb50-9095-11e6-94cb-f151169f5d76", "An Entry Body Text Dump JSON", "An Entry Title JSON", expires.getEpochSecond(), true, secret, now.getEpochSecond());
+        entryServiceCasandra.insert(payload);
 
         client.get(PORT, SERVER, requestURI, response -> {
 
@@ -182,7 +155,6 @@ public class PastesAPITest {
     @Test
     public void testNewEntryViaJSON(TestContext context) throws Exception {
 
-        //If entry is public vertx.EventBus().publish()
 
         HttpClient client = vertx.createHttpClient();
         Async async = context.async();
@@ -207,9 +179,6 @@ public class PastesAPITest {
 
     @Test
     public void testNewEntryViaHTMLForm(TestContext context) throws Exception {
-
-        //If entry is public vertx.EventBus().publish()
-
 
         HttpClient client = vertx.createHttpClient();
         Async async = context.async();
