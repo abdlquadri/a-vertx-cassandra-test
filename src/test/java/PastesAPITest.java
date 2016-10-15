@@ -1,7 +1,3 @@
-import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.PreparedStatement;
-import com.datastax.driver.core.Session;
 import com.datastax.driver.core.utils.UUIDs;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
@@ -19,17 +15,13 @@ import org.apache.shiro.crypto.SecureRandomNumberGenerator;
 import org.apache.shiro.crypto.hash.Sha512Hash;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.net.URLEncoder;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.UUID;
-
-import static ng.abdlquadri.pastes.service.impl.EntryServiceCasandraImpl.session;
 
 /**
  * Created by abdlquadri on 10/9/16.
