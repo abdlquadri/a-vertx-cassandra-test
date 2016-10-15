@@ -87,4 +87,4 @@ task wrapper(type: Wrapper) {
     gradleVersion = '2.0'
 }
 
-//shadowJar.dependsOn test
+shadowJar.dependsOn test
