@@ -87,9 +87,9 @@ public class EntryServiceCasandraImpl implements EntryService {
                 .setBool("publicly_visible", entry.isVisible())
         ;
 
-        ResultSet execute = session.execute(boundEntryInsert);
+        ResultSet resultSet = session.execute(boundEntryInsert);
 
-        result = execute.wasApplied();
+        result = resultSet.wasApplied();
         future.complete(result);
         return future;
     }
@@ -178,9 +178,14 @@ public class EntryServiceCasandraImpl implements EntryService {
                 .setString("secret", newEntry.getSecret())
         ;
 
-        session.execute(boundEntryUpdate);
+        ResultSet resultSet = session.execute(boundEntryUpdate);
 
-        future.complete(newEntry);
+        if(resultSet.wasApplied()){
+
+        future.complete(newEntry);}
+        else {
+            future.complete(null);
+        }
         return future;
     }
 
@@ -198,9 +203,9 @@ public class EntryServiceCasandraImpl implements EntryService {
                 .setString("secret", secret)
         ;
 
-        ResultSet execute = session.execute(boundEntryDelete);
+        ResultSet resultSet = session.execute(boundEntryDelete);
 
-        result = execute.wasApplied();
+        result = resultSet.wasApplied();
         future.complete(result);
         return future;
     }

@@ -73,12 +73,19 @@ public class PastesAPITest {
         HttpClient client = vertx.createHttpClient();
         Async async = context.async();
 
-        client.delete(PORT, SERVER, "/entries/" + id, response -> {
+        String id = UUIDs.random().toString();
+        String requestURI = "/entries/"+id; //this id should be created first
+
+        EntryServiceCasandraImpl entryServiceCasandra = new EntryServiceCasandraImpl();
+        Entry payload = new Entry(id, "An Entry Body Text Dump JSON", "An Entry Title JSON", new Date(expires.getEpochSecond()), true, secret, new Date(now.getEpochSecond()));
+        entryServiceCasandra.insert(payload);
+
+        client.delete(PORT, SERVER, requestURI, response -> {
             context.assertEquals(204, response.statusCode());
             client.close();
             async.complete();
         }).putHeader("content-type", "application/json")
-                .putHeader("x-secret", "mnnv")//this may break some clients, we can pass a second param
+                .putHeader("x-secret", secret)//this may break some clients, we can pass a second param
                 .end();
 
     }
@@ -88,22 +95,25 @@ public class PastesAPITest {
 
         HttpClient client = vertx.createHttpClient();
         Async async = context.async();
-        String requestURI = "/entries/668afb50-9095-11e6-94cb-f151169f5d76"; //this id should be created first
+        String id = UUIDs.random().toString();
+        String requestURI = "/entries/"+id; //this id should be created first
 
         EntryServiceCasandraImpl entryServiceCasandra = new EntryServiceCasandraImpl();
-        Entry payload = new Entry("668afb50-9095-11e6-94cb-f151169f5d76", "An Entry Body Text Dump JSON", "An Entry Title JSON", new Date(expires.getEpochSecond()), true, secret, new Date(now.getEpochSecond()));
+        Entry payload = new Entry(id, "An Entry Body Text Dump JSON", "An Entry Title JSON", new Date(expires.getEpochSecond()), true, secret, new Date(now.getEpochSecond()));
         entryServiceCasandra.insert(payload);
 
         client.get(PORT, SERVER, requestURI, response -> {
+            context.assertEquals(200, response.statusCode());
 
             response.bodyHandler(buffer -> {
-                JsonObject entryUpdated = buffer.toJsonObject().put("body", "Overridden");//override body field;
+                JsonObject entryUpdated = buffer.toJsonObject().put("body", "Overridden zzz");//override body field;
 
                 client.put(PORT, SERVER, requestURI, response2 -> {
                     context.assertEquals(200, response2.statusCode());
                     client.close();
                     async.complete();
-                }).putHeader("content-type", "application/json").end(entryUpdated.encode());
+                }).putHeader("content-type", "application/json")
+                        .putHeader("x-secret", secret).end(entryUpdated.encode());
             });
         }).putHeader("content-type", "application/json")
                 .end();

@@ -131,7 +131,8 @@ public class EntryVerticle extends AbstractVerticle {
         System.out.println(bodyAsJson);
 
         Entry entry = new Entry(bodyAsJson);
-
+        String secret = routingContext.request().getHeader("x-secret");
+        entry.setSecret(secret);
         entryServiceCasandra.update(entry.getId(), entry).setHandler(result -> {
             if (result.result() != null) {
                 routingContext.response()
