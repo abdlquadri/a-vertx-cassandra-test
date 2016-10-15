@@ -43,7 +43,7 @@ public class PastesAPITest {
     public void before(TestContext context) {
         vertx = Vertx.vertx();
         final DeploymentOptions options = new DeploymentOptions()
-                .setConfig(new JsonObject().put("http.port", PORT)
+                .setConfig(new JsonObject().put("http.port", PORT).put("cassandra.host", SERVER)
                 ).setWorker(true);
 
         EntryVerticle verticle = new EntryVerticle();

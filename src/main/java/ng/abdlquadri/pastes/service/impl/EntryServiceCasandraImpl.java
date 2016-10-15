@@ -18,11 +18,11 @@ public class EntryServiceCasandraImpl implements EntryService {
     public static Session session;
 
     @Override
-    public Future<Boolean> initializeDatastore() {
+    public Future<Boolean> initializeDatastore(String cassandraHost) {
         Future<Boolean> future = Future.future();
 
         cluster = Cluster.builder()
-                .addContactPoint("127.0.0.1")
+                .addContactPoint(cassandraHost)
                 .build();
 
         Metadata metadata = cluster.getMetadata();

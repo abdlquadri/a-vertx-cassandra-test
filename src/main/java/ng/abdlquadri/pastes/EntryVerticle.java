@@ -277,7 +277,7 @@ public class EntryVerticle extends AbstractVerticle {
     }
 
     private void initializeDataStore() {
-        entryServiceCasandra.initializeDatastore().setHandler(result -> {
+        entryServiceCasandra.initializeDatastore(config().getString("cassandra.host")).setHandler(result -> {
             if (result.failed()) {
                 result.cause().printStackTrace();
             }

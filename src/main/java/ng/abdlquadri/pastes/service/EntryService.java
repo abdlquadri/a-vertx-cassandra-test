@@ -11,7 +11,7 @@ import java.util.Optional;
  */
 public interface EntryService {
 
-    Future<Boolean> initializeDatastore();
+    Future<Boolean> initializeDatastore(String datastoreHost);
 
     Future<Boolean> insert(Entry entry);
 
