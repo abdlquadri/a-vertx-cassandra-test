@@ -15,8 +15,6 @@
 |===
 ^|Name | Type ^| Description
 |[[body]]`body`|`String`|-
-|[[creationDate]]`creationDate`|`Number (long)`|-
-|[[expires]]`expires`|`Number (long)`|-
 |[[id]]`id`|`String`|-
 |[[secret]]`secret`|`String`|-
 |[[title]]`title`|`String`|-

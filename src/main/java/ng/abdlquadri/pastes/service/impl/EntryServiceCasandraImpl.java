@@ -82,8 +82,8 @@ public class EntryServiceCasandraImpl implements EntryService {
                 .setString("secret", entry.getSecret())
                 .setString("body", entry.getBody())
                 .setString("title", entry.getTitle())
-                .setTimestamp("creation_date", new Date(entry.getCreationDate()))
-                .setTimestamp("expires", new Date(entry.getExpires()))
+                .setTimestamp("creation_date", entry.getCreationDate())
+                .setTimestamp("expires", entry.getExpires())
                 .setBool("publicly_visible", entry.isVisible())
         ;
 
@@ -151,10 +151,10 @@ public class EntryServiceCasandraImpl implements EntryService {
         entry.setId(row.getString("entry_id"));
         entry.setBody(row.getString("body"));
         entry.setTitle(row.getString("title"));
-        entry.setExpires(row.getTimestamp("expires").getTime());
+        entry.setExpires(row.getTimestamp("expires"));
         entry.setVisible(row.getBool("publicly_visible"));
         entry.setSecret(row.getString("secret"));
-        entry.setCreationDate(row.getTimestamp("creation_date").getTime());
+        entry.setCreationDate(row.getTimestamp("creation_date"));
 
         future.complete(Optional.ofNullable(entry));
         return future;

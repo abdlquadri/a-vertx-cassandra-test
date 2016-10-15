@@ -91,7 +91,7 @@ public class PastesAPITest {
         String requestURI = "/entries/668afb50-9095-11e6-94cb-f151169f5d76"; //this id should be created first
 
         EntryServiceCasandraImpl entryServiceCasandra = new EntryServiceCasandraImpl();
-        Entry payload = new Entry("668afb50-9095-11e6-94cb-f151169f5d76", "An Entry Body Text Dump JSON", "An Entry Title JSON", expires.getEpochSecond(), true, secret, now.getEpochSecond());
+        Entry payload = new Entry("668afb50-9095-11e6-94cb-f151169f5d76", "An Entry Body Text Dump JSON", "An Entry Title JSON", new Date(expires.getEpochSecond()), true, secret, new Date(now.getEpochSecond()));
         entryServiceCasandra.insert(payload);
 
         client.get(PORT, SERVER, requestURI, response -> {
@@ -135,7 +135,7 @@ public class PastesAPITest {
 
         UUID uuid = UUIDs.timeBased();
 
-        Entry payload = new Entry(uuid.toString(), "An Entry Body Text Dump JSON", "An Entry Title JSON", expires.getEpochSecond(), true, secret, now.getEpochSecond());
+        Entry payload = new Entry(uuid.toString(), "An Entry Body Text Dump JSON", "An Entry Title JSON", new Date(expires.getEpochSecond()), true, secret, new Date(now.getEpochSecond()));
 
         client.post(PORT, SERVER, "/entries", response -> {
 
@@ -167,7 +167,7 @@ public class PastesAPITest {
         Instant now = Instant.now();
         Instant expires = now.plus(30, ChronoUnit.DAYS);
 
-        Entry entry = new Entry(id, "An Entry Body Text Dump JSON", "An Entry Title JSON", expires.getEpochSecond(), true, secret, now.getEpochSecond());
+        Entry entry = new Entry(id, "An Entry Body Text Dump JSON", "An Entry Title JSON", new Date(expires.getEpochSecond()), true, secret, new Date(now.getEpochSecond()));
 
         client.post(PORT, SERVER, Constants.API_CREATE, response -> {
             context.assertEquals(201, response.statusCode());

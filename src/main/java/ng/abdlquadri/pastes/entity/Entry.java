@@ -4,6 +4,8 @@ import com.datastax.driver.core.Row;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
+import java.util.Date;
+
 /**
  * Created by abdlquadri on 10/9/16.
  * <p>
@@ -16,8 +18,8 @@ public class Entry {
     private String id;
     private String body;
     private String title;
-    private long expires;//expiry timestamp
-    private long creationDate;
+    private Date expires;//expiry timestamp
+    private Date creationDate;
     private boolean visible;//private is keyword
     private String secret;
 
@@ -26,18 +28,18 @@ public class Entry {
         this.id = row.getString("entry_id");
         this.body = row.getString("body");
         this.title = row.getString("title");
-        this.expires = row.getLong("expires");
+        this.expires = row.getTimestamp("expires");
         this.visible = row.getBool("publicly_visible");
         this.secret = row.getString("secret");
-        this.creationDate = row.getLong("creation_date");
+        this.creationDate = row.getTimestamp("creation_date");
 
     }
 
-    public long getCreationDate() {
+    public Date getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(long creationDate) {
+    public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
     }
 
@@ -72,7 +74,7 @@ public class Entry {
         EntryConverter.fromJson(new JsonObject(pasteString), this);
     }
 
-    public Entry(String id, String body, String title, long expires, boolean visible, String secret, long creationDate) {
+    public Entry(String id, String body, String title, Date expires, boolean visible, String secret, Date creationDate) {
         this.id = id;
         this.body = body;
         this.title = title;
@@ -112,11 +114,11 @@ public class Entry {
         this.title = title;
     }
 
-    public long getExpires() {
+    public Date getExpires() {
         return expires;
     }
 
-    public void setExpires(long expires) {
+    public void setExpires(Date expires) {
         this.expires = expires;
     }
 
