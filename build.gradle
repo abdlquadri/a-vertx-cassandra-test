@@ -76,7 +76,7 @@ shadowJar {
     classifier = 'fat'
     manifest {
         attributes 'Main-Class': 'io.vertx.core.Launcher'
-        attributes 'Main-Verticle': 'ng.abdlquadri.util.Deployer'
+        attributes 'Main-Verticle': 'ng.abdlquadri.pastes.util.DeployerVerticle'
     }
     mergeServiceFiles {
         include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
@@ -87,4 +87,4 @@ task wrapper(type: Wrapper) {
     gradleVersion = '2.0'
 }
 
-shadowJar.dependsOn test
+//shadowJar.dependsOn test
