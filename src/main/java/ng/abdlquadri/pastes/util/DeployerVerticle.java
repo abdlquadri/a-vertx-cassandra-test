@@ -19,7 +19,7 @@ public class DeployerVerticle extends AbstractVerticle {
     @Override
     public void start(Future<Void> startFuture) {
 
-        DeploymentOptions deploymentOptions = new DeploymentOptions().setConfig(config());
+        DeploymentOptions deploymentOptions = new DeploymentOptions().setConfig(config()).setWorker(true);
 
         vertx.deployVerticle(new EntryVerticle(), deploymentOptions);
 
